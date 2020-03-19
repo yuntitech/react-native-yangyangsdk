@@ -1,0 +1,148 @@
+
+package com.xuexue.lib.sdk;
+
+import android.app.Activity;
+import android.text.TextUtils;
+
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.Promise;
+import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReactContextBaseJavaModule;
+import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.xuexue.lib.sdk.login.IYangYangLoginCallback;
+import com.xuexue.lib.sdk.login.IYangYangLoginHandler;
+import com.xuexue.lib.sdk.pay.IYangYangPayCallback;
+import com.xuexue.lib.sdk.pay.IYangYangPayHandler;
+import com.xuexue.lib.sdk.pay.YangYangPayRequest;
+
+public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements IYangYangLoginHandler,
+        IYangYangPayHandler {
+
+    private final ReactApplicationContext reactContext;
+    private DeviceEventManagerModule.RCTDeviceEventEmitter eventEmitter;
+    private YangYangAPI yyAPI;
+    private IYangYangLoginCallback mIYangYangLoginCallback;
+    private IYangYangPayCallback mIYangYangPayCallback;
+    private static final String EVENT_YANGYANG_LOGIN_REQUEST = "YANGYANG_LOGIN_REQUEST";
+    private static final String EVENT_YANGYANG_PAY_REQUEST = "YANGYANG_PLAY_REQUEST";
+
+    public RNYangYangSdkModule(ReactApplicationContext reactContext) {
+        super(reactContext);
+        this.reactContext = reactContext;
+    }
+
+    @Override
+    public String getName() {
+        return "RNYangYangSdk";
+    }
+
+    @Override
+    public void initialize() {
+        super.initialize();
+        this.eventEmitter = reactContext
+                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class);
+    }
+
+    @ReactMethod
+    public void isModuleInstalled(String moduleName, Promise promise) {
+        createIfNeeded();
+        if (checkValid(moduleName, promise)) {
+            promise.resolve(yyAPI.isModuleInstalled(moduleName));
+        }
+    }
+
+    @ReactMethod
+    public void isModuleDownloaded(String moduleName, Promise promise) {
+        createIfNeeded();
+        if (checkValid(moduleName, promise)) {
+            promise.resolve(yyAPI.isModuleDownloaded(moduleName));
+        }
+    }
+
+    @ReactMethod
+    public void unzipModule(String moduleName, final Promise promise) {
+        createIfNeeded();
+        if (checkValid(moduleName, promise)) {
+            yyAPI.unzipModule(moduleName, new Runnable() {
+                @Override
+                public void run() {
+                    promise.resolve(Arguments.createMap());
+                }
+            });
+        }
+    }
+
+    @ReactMethod
+    public void downloadModule(String moduleName, final Promise promise) {
+        createIfNeeded();
+        if (checkValid(moduleName, promise)) {
+            yyAPI.downloadModule(moduleName, new Runnable() {
+                @Override
+                public void run() {
+                    promise.resolve(Arguments.createMap());
+                }
+            });
+        }
+    }
+
+    @ReactMethod
+    public void launchModule(String moduleName, Promise promise) {
+        createIfNeeded();
+        if (checkValid(moduleName, promise)) {
+            yyAPI.launchModule(moduleName);
+            promise.resolve(Arguments.createMap());
+        }
+    }
+
+    @ReactMethod
+    public void onLoginCallback(ReadableMap params) {
+        if (mIYangYangLoginCallback != null) {
+            mIYangYangLoginCallback.onLoginCallback(Utils.toYangYangLoginResult(params));
+        }
+    }
+
+    @ReactMethod
+    public void onPayCallback(ReadableMap params) {
+        if (mIYangYangPayCallback != null) {
+            mIYangYangPayCallback.onPayCallback(Utils.toYangYangPayResult(params));
+        }
+    }
+
+    private boolean checkValid(String moduleName, Promise promise) {
+        if (TextUtils.isEmpty(moduleName)) {
+            promise.reject(new Exception("moduleName is empty "));
+            return false;
+        }
+        if (yyAPI == null) {
+            promise.reject(new Exception("createYangYangAPI failed "));
+            return false;
+        }
+        return true;
+    }
+
+    private void createIfNeeded() {
+        Activity activity = getCurrentActivity();
+        if (yyAPI == null && activity != null) {
+            yyAPI = YangYangAPIFactory.createYangYangAPI(activity, BuildConfig.DEBUG);
+            yyAPI.setLoginHandler(this);
+            yyAPI.setPayHandler(this);
+        }
+    }
+
+    @Override
+    public void onLoginRequest(IYangYangLoginCallback iYangYangLoginCallback) {
+        mIYangYangLoginCallback = iYangYangLoginCallback;
+        eventEmitter.emit(EVENT_YANGYANG_LOGIN_REQUEST, Arguments.createMap());
+    }
+
+    @Override
+    public void onPayRequest(YangYangPayRequest yangYangPayRequest, IYangYangPayCallback iYangYangPayCallback) {
+        mIYangYangPayCallback = iYangYangPayCallback;
+        WritableMap data = Arguments.createMap();
+        data.putString("requestId", yangYangPayRequest.requestId);
+        eventEmitter.emit(EVENT_YANGYANG_PAY_REQUEST, data);
+    }
+}
