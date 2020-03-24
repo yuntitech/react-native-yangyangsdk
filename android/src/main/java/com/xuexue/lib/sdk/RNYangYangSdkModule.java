@@ -2,6 +2,7 @@
 package com.xuexue.lib.sdk;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.text.TextUtils;
 
 import com.facebook.react.bridge.Arguments;
@@ -14,9 +15,11 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.xuexue.lib.sdk.login.IYangYangLoginCallback;
 import com.xuexue.lib.sdk.login.IYangYangLoginHandler;
+import com.xuexue.lib.sdk.login.YangYangUserInfo;
 import com.xuexue.lib.sdk.pay.IYangYangPayCallback;
 import com.xuexue.lib.sdk.pay.IYangYangPayHandler;
 import com.xuexue.lib.sdk.pay.YangYangPayRequest;
+
 
 public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements IYangYangLoginHandler,
         IYangYangPayHandler {
@@ -32,6 +35,7 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
     public RNYangYangSdkModule(ReactApplicationContext reactContext) {
         super(reactContext);
         this.reactContext = reactContext;
+
     }
 
     @Override
@@ -89,10 +93,10 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
     }
 
     @ReactMethod
-    public void launchModule(String moduleName, Promise promise) {
+    public void launchModule(String moduleName, YangYangUserInfo userInfo, Promise promise) {
         createIfNeeded();
         if (checkValid(moduleName, promise)) {
-            yyAPI.launchModule(moduleName);
+            yyAPI.launchModule(moduleName, userInfo);
             promise.resolve(Arguments.createMap());
         }
     }
@@ -110,6 +114,25 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
             mIYangYangPayCallback.onPayCallback(Utils.toYangYangPayResult(params));
         }
     }
+
+
+    @ReactMethod
+    public void startNavigationActivity() {
+        Activity activity = getCurrentActivity();
+        if (activity == null) {
+            return;
+        }
+        try {
+            Class<?> clazz = Class.forName("com.reactnativenavigation.controllers.NavigationActivity");
+            Intent intent = new Intent(activity, clazz);
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            activity.startActivity(intent);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
 
     private boolean checkValid(String moduleName, Promise promise) {
         if (TextUtils.isEmpty(moduleName)) {
@@ -145,4 +168,6 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
         data.putString("requestId", yangYangPayRequest.requestId);
         eventEmitter.emit(EVENT_YANGYANG_PAY_REQUEST, data);
     }
+
+
 }
