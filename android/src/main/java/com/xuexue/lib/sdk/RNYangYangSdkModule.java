@@ -15,7 +15,6 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.xuexue.lib.sdk.login.IYangYangLoginCallback;
 import com.xuexue.lib.sdk.login.IYangYangLoginHandler;
-import com.xuexue.lib.sdk.login.YangYangUserInfo;
 import com.xuexue.lib.sdk.pay.IYangYangPayCallback;
 import com.xuexue.lib.sdk.pay.IYangYangPayHandler;
 import com.xuexue.lib.sdk.pay.YangYangPayRequest;
@@ -31,6 +30,7 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
     private IYangYangPayCallback mIYangYangPayCallback;
     private static final String EVENT_YANGYANG_LOGIN_REQUEST = "YANGYANG_LOGIN_REQUEST";
     private static final String EVENT_YANGYANG_PAY_REQUEST = "YANGYANG_PLAY_REQUEST";
+    private boolean mDebug = false;
 
     public RNYangYangSdkModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -48,6 +48,20 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
         super.initialize();
         this.eventEmitter = reactContext
                 .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class);
+    }
+
+    @ReactMethod
+    public void setDebug(boolean debug) {
+        Activity activity = getCurrentActivity();
+        if (activity != null && mDebug != debug) {
+            mDebug = debug;
+            if (yyAPI != null) {
+                yyAPI = null;
+            }
+            yyAPI = YangYangAPIFactory.createYangYangAPI(activity, debug);
+            yyAPI.setLoginHandler(this);
+            yyAPI.setPayHandler(this);
+        }
     }
 
     @ReactMethod
@@ -93,10 +107,10 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
     }
 
     @ReactMethod
-    public void launchModule(String moduleName, YangYangUserInfo userInfo, Promise promise) {
+    public void launchModule(String moduleName, ReadableMap userInfo, Promise promise) {
         createIfNeeded();
         if (checkValid(moduleName, promise)) {
-            yyAPI.launchModule(moduleName, userInfo);
+            yyAPI.launchModule(moduleName, userInfo != null ? Utils.toYangYangUserInfo(userInfo) : null);
             promise.resolve(Arguments.createMap());
         }
     }
@@ -149,7 +163,7 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
     private void createIfNeeded() {
         Activity activity = getCurrentActivity();
         if (yyAPI == null && activity != null) {
-            yyAPI = YangYangAPIFactory.createYangYangAPI(activity, BuildConfig.DEBUG);
+            yyAPI = YangYangAPIFactory.createYangYangAPI(activity, false);
             yyAPI.setLoginHandler(this);
             yyAPI.setPayHandler(this);
         }

@@ -9,9 +9,9 @@ export const YangYangEvents = {
 };
 
 export type YangYangUserInfo = {
-  userId: string,
-  accountId: string,
-  accountType: string,
+  userId: ?string,
+  accountId: ?string,
+  accountType: ?string,
 };
 
 export type YangYangLoginResult = {
@@ -92,6 +92,10 @@ const startNavigationActivity = () => {
   RNYangYangSdk.startNavigationActivity();
 };
 
+const setDebug = (debug: boolean) => {
+  RNYangYangSdk.setDebug(debug);
+};
+
 const addListener = (
   eventName: string,
   callback: (data: { requestId?: string }) => void
@@ -115,6 +119,7 @@ export default {
   onLoginCallback,
   onPayCallback,
   startNavigationActivity,
+  setDebug,
   addListener,
   removeListener,
 };
