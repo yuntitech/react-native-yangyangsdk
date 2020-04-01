@@ -18,6 +18,9 @@ import com.xuexue.lib.sdk.login.IYangYangLoginHandler;
 import com.xuexue.lib.sdk.pay.IYangYangPayCallback;
 import com.xuexue.lib.sdk.pay.IYangYangPayHandler;
 import com.xuexue.lib.sdk.pay.YangYangPayRequest;
+import com.xuexue.lib.sdk.purchase.YangYangPurchaseCallback;
+import com.xuexue.lib.sdk.purchase.YangYangPurchaseInfo;
+
 
 
 public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements IYangYangLoginHandler,
@@ -146,6 +149,21 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
         }
 
     }
+
+    @ReactMethod
+    public void getPurchasedModules(String userId, final Promise promise) {
+            createIfNeeded();
+            if (yyAPI == null) {
+                promise.reject(new Exception("createYangYangAPI failed "));
+                return;
+            }
+            yyAPI.getPurchasedModules(userId, new YangYangPurchaseCallback() {
+                @Override
+                public void onPurchaseCallback(YangYangPurchaseInfo yangYangPurchaseInfo) {
+                    promise.resolve(Utils.fromYangYangPurchaseInfo(yangYangPurchaseInfo));
+                }
+            });
+        }
 
 
     private boolean checkValid(String moduleName, Promise promise) {

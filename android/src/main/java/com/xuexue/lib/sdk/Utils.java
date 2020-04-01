@@ -1,12 +1,24 @@
 package com.xuexue.lib.sdk;
 
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.WritableMap;
 import com.xuexue.lib.sdk.login.YangYangLoginResult;
 import com.xuexue.lib.sdk.login.YangYangUserInfo;
 import com.xuexue.lib.sdk.pay.YangYangPayResult;
+import com.xuexue.lib.sdk.purchase.YangYangPurchaseInfo;
 
 public class Utils {
 
+    static WritableMap fromYangYangPurchaseInfo(YangYangPurchaseInfo info) {
+        WritableMap result = Arguments.createMap();
+        result.putInt("statusCode", info.statusCode);
+        result.putString("errorMessage", info.errorMessage);
+        if(info.modules != null){
+            result.putArray("modules", Arguments.fromJavaArgs(info.modules));
+        }
+        return result;
+    }
 
     static YangYangLoginResult toYangYangLoginResult(ReadableMap params) {
         YangYangLoginResult result = new YangYangLoginResult();

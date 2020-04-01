@@ -8,6 +8,12 @@ export const YangYangEvents = {
   PLAY_REQUEST: 'YANGYANG_PLAY_REQUEST',
 };
 
+export type YangYangPurchaseInfo = {
+  statusCode: number,
+  errorMessage: string,
+  modules: Array<string>,
+};
+
 export type YangYangUserInfo = {
   userId: ?string,
   accountId: ?string,
@@ -96,6 +102,10 @@ const setDebug = (debug: boolean) => {
   RNYangYangSdk.setDebug(debug);
 };
 
+const getPurchasedModules = (userId: string): Promise<YangYangPurchaseInfo> => {
+  return RNYangYangSdk.getPurchasedModules(userId);
+};
+
 const addListener = (
   eventName: string,
   callback: (data: { requestId?: string }) => void
@@ -120,6 +130,7 @@ export default {
   onPayCallback,
   startNavigationActivity,
   setDebug,
+  getPurchasedModules,
   addListener,
   removeListener,
 };
