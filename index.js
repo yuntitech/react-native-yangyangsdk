@@ -1,7 +1,10 @@
-import { NativeEventEmitter, NativeModules } from 'react-native';
+import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
 
 const { RNYangYangSdk } = NativeModules;
-const EventEmitter = new NativeEventEmitter(RNYangYangSdk);
+let EventEmitter;
+if (Platform.OS === 'android') {
+  EventEmitter = new NativeEventEmitter(RNYangYangSdk);
+}
 
 export const YangYangEvents = {
   LOGIN_REQUEST: 'YANGYANG_LOGIN_REQUEST',
