@@ -11,6 +11,16 @@ export const YangYangEvents = {
   PLAY_REQUEST: 'YANGYANG_PLAY_REQUEST',
 };
 
+export type YangYangModuleInfo = {
+  statusCode: number,
+  errorMessage: string,
+  packageName: string,
+  version: string,
+  size: string,
+  zipChecksum: string,
+  appChecksum: string,
+};
+
 export type YangYangPurchaseInfo = {
   statusCode: number,
   errorMessage: string,
@@ -38,19 +48,37 @@ export type YangYangPayResult = {
   time: number,
 };
 
+const getModuleInfo = (moduleName: string): Promise<YangYangModuleInfo> => {
+  return RNYangYangSdk.getModuleInfo(moduleName);
+};
+
+const isModulePartialDownloaded = (
+  moduleInfo: YangYangModuleInfo
+): Promise<boolean> => {
+  return RNYangYangSdk.isModulePartialDownloaded(moduleInfo);
+};
+
+const showDownloadDialog = (size: string): Promise<void> => {
+  return RNYangYangSdk.showDownloadDialog(size);
+};
+
 /**
  * 模块是否安装
  */
-const isModuleInstalled = (moduleName: string): Promise<boolean> => {
-  return RNYangYangSdk.isModuleInstalled(moduleName);
+const isModuleInstalled = (
+  moduleInfo: YangYangModuleInfo
+): Promise<boolean> => {
+  return RNYangYangSdk.isModuleInstalled(moduleInfo);
 };
 
 /**
  * 模块是否已下载
  * @param moduleName
  */
-const isModuleDownloaded = (moduleName: string): Promise<boolean> => {
-  return RNYangYangSdk.isModuleDownloaded(moduleName);
+const isModuleDownloaded = (
+  moduleInfo: YangYangModuleInfo
+): Promise<boolean> => {
+  return RNYangYangSdk.isModuleDownloaded(moduleInfo);
 };
 
 /**
@@ -124,6 +152,9 @@ const removeListener = (
 };
 
 export default {
+  getModuleInfo,
+  isModulePartialDownloaded,
+  showDownloadDialog,
   isModuleInstalled,
   isModuleDownloaded,
   unzipModule,

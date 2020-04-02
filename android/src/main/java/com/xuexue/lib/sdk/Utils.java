@@ -5,16 +5,41 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.xuexue.lib.sdk.login.YangYangLoginResult;
 import com.xuexue.lib.sdk.login.YangYangUserInfo;
+import com.xuexue.lib.sdk.module.YangYangModuleInfo;
 import com.xuexue.lib.sdk.pay.YangYangPayResult;
 import com.xuexue.lib.sdk.purchase.YangYangPurchaseInfo;
 
 public class Utils {
 
+    static YangYangModuleInfo toYangYangModuleInfo(ReadableMap params) {
+        YangYangModuleInfo info = new YangYangModuleInfo();
+        info.statusCode = Double.valueOf(getDouble(params, "statusCode")).intValue();
+        info.errorMessage = getString(params, "errorMessage");
+        info.packageName = getString(params, "packageName");
+        info.version = getString(params, "version");
+        info.size = getString(params, "size");
+        info.zipChecksum = getString(params, "zipChecksum");
+        info.appChecksum = getString(params, "appChecksum");
+        return info;
+    }
+
+    static WritableMap fromYangYangModuleInfo(YangYangModuleInfo info) {
+        WritableMap result = Arguments.createMap();
+        result.putInt("statusCode", info.statusCode);
+        result.putString("errorMessage", info.errorMessage);
+        result.putString("packageName", info.packageName);
+        result.putString("version", info.version);
+        result.putString("size", info.size);
+        result.putString("zipChecksum", info.zipChecksum);
+        result.putString("appChecksum", info.appChecksum);
+        return result;
+    }
+
     static WritableMap fromYangYangPurchaseInfo(YangYangPurchaseInfo info) {
         WritableMap result = Arguments.createMap();
         result.putInt("statusCode", info.statusCode);
         result.putString("errorMessage", info.errorMessage);
-        if(info.modules != null){
+        if (info.modules != null) {
             result.putArray("modules", Arguments.fromJavaArgs(info.modules));
         }
         return result;
