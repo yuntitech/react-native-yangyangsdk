@@ -224,7 +224,7 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
     private void createIfNeeded() {
         Activity activity = getCurrentActivity();
         if (yyAPI == null && activity != null) {
-            yyAPI = YangYangAPIFactory.createYangYangAPI(activity, false);
+            yyAPI = YangYangAPIFactory.createYangYangAPI(activity, mDebug);
             yyAPI.setLoginHandler(this);
             yyAPI.setPayHandler(this);
         }
