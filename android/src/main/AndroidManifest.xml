@@ -10,7 +10,7 @@
             android:launchMode="singleInstance"
             android:screenOrientation="sensorLandscape"
             android:theme="@style/GdxTheme"
-            tools:replace="android:launchMode">
+            tools:replace="android:launchMode,android:theme">
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
 
