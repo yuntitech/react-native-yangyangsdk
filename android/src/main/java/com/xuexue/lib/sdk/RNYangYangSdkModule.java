@@ -76,10 +76,10 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
     }
 
     @ReactMethod
-    public void showDownloadDialog(String size, final Promise promise) {
+    public void showDownloadDialog(String size, String moduleName, final Promise promise) {
         createIfNeeded();
         if (checkValid(promise)) {
-            yyAPI.showDownloadDialog(size, new Runnable() {
+            yyAPI.showDownloadDialog(size, moduleName, new Runnable() {
                 @Override
                 public void run() {
                     promise.resolve(Arguments.createMap());
