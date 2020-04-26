@@ -58,8 +58,8 @@ const isModulePartialDownloaded = (
   return RNYangYangSdk.isModulePartialDownloaded(moduleInfo);
 };
 
-const showDownloadDialog = (size: string): Promise<void> => {
-  return RNYangYangSdk.showDownloadDialog(size);
+const showDownloadDialog = (moduleName: string, size: string): Promise<void> => {
+  return RNYangYangSdk.showDownloadDialog(moduleName, size);
 };
 
 /**
