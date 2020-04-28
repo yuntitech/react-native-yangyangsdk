@@ -7,7 +7,7 @@
             android:name="com.xuexue.lib.sdk.DynamicGdxActivity"
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout"
             android:label="@string/app_name"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTop"
             android:screenOrientation="sensorLandscape"
             android:theme="@style/GdxTheme"
             tools:replace="android:launchMode,android:theme">
@@ -19,4 +19,3 @@
         </activity>
     </application>
 </manifest>
-  
