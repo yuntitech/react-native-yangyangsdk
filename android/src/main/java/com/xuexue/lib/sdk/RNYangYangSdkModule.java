@@ -15,6 +15,7 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.xuexue.lib.sdk.login.IYangYangLoginCallback;
 import com.xuexue.lib.sdk.login.IYangYangLoginHandler;
+import com.xuexue.lib.sdk.login.YangYangUserInfo;
 import com.xuexue.lib.sdk.module.YangYangModuleCallback;
 import com.xuexue.lib.sdk.module.YangYangModuleInfo;
 import com.xuexue.lib.sdk.pay.IYangYangPayCallback;
@@ -148,8 +149,21 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
     public void launchModule(String moduleName, ReadableMap userInfo, Promise promise) {
         createIfNeeded();
         if (checkValid(moduleName, promise)) {
-            yyAPI.launchModule(moduleName, userInfo != null ? Utils.toYangYangUserInfo(userInfo) : null);
-            promise.resolve(Arguments.createMap());
+            Activity activity = getCurrentActivity();
+            if (activity != null) {
+                Intent intent = new Intent(activity, DynamicGdxActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                intent.putExtra("app_id", moduleName);
+                YangYangUserInfo yangUserInfo = userInfo != null ? Utils.toYangYangUserInfo(userInfo) : null;
+                if (yangUserInfo != null) {
+                    intent.putExtra("user_id", yangUserInfo.userId);
+                }
+                activity.startActivity(intent);
+                promise.resolve(Arguments.createMap());
+            } else {
+                promise.reject(new Exception("activity is null"));
+            }
+
         }
     }
 
