@@ -20,6 +20,7 @@ public class Utils {
         info.size = getString(params, "size");
         info.zipChecksum = getString(params, "zipChecksum");
         info.appChecksum = getString(params, "appChecksum");
+        info.appName = getString(params, "appName");
         return info;
     }
 
@@ -32,6 +33,7 @@ public class Utils {
         result.putString("size", info.size);
         result.putString("zipChecksum", info.zipChecksum);
         result.putString("appChecksum", info.appChecksum);
+        result.putString("appName", info.appName);
         return result;
     }
 

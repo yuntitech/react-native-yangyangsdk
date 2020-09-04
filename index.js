@@ -19,6 +19,7 @@ export type YangYangModuleInfo = {
   size: string,
   zipChecksum: string,
   appChecksum: string,
+  appName: string,
 };
 
 export type YangYangPurchaseInfo = {
