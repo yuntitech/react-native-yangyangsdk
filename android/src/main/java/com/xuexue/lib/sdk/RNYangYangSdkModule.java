@@ -72,7 +72,7 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
     public void isModulePartialDownloaded(ReadableMap moduleInfo, Promise promise) {
         createIfNeeded();
         YangYangModuleInfo yangModuleInfo = Utils.toYangYangModuleInfo(moduleInfo);
-        if (checkValid(yangModuleInfo.appName, promise)) {
+        if (checkValid(yangModuleInfo.packageName, promise)) {
             promise.resolve(yyAPI.isModulePartialDownloaded(yangModuleInfo));
         }
     }
@@ -81,7 +81,7 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
     public void showDownloadDialog(ReadableMap moduleInfo, final Promise promise) {
         createIfNeeded();
         YangYangModuleInfo yangModuleInfo = Utils.toYangYangModuleInfo(moduleInfo);
-        if (checkValid(yangModuleInfo.appName, promise)) {
+        if (checkValid(yangModuleInfo.packageName, promise)) {
             yyAPI.showDownloadDialog(yangModuleInfo, new Runnable() {
                 @Override
                 public void run() {
@@ -109,7 +109,7 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
     public void isModuleInstalled(ReadableMap moduleInfo, Promise promise) {
         createIfNeeded();
         YangYangModuleInfo yangModuleInfo = Utils.toYangYangModuleInfo(moduleInfo);
-        if (checkValid(yangModuleInfo.appName, promise)) {
+        if (checkValid(yangModuleInfo.packageName, promise)) {
             promise.resolve(yyAPI.isModuleInstalled(yangModuleInfo));
         }
     }
@@ -118,7 +118,7 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
     public void isModuleDownloaded(ReadableMap moduleInfo, Promise promise) {
         createIfNeeded();
         YangYangModuleInfo yangModuleInfo = Utils.toYangYangModuleInfo(moduleInfo);
-        if (checkValid(yangModuleInfo.appName, promise)) {
+        if (checkValid(yangModuleInfo.packageName, promise)) {
             promise.resolve(yyAPI.isModuleDownloaded(yangModuleInfo));
         }
     }
@@ -127,7 +127,7 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
     public void unzipModule(ReadableMap moduleInfo, final Promise promise) {
         createIfNeeded();
         YangYangModuleInfo yangModuleInfo = Utils.toYangYangModuleInfo(moduleInfo);
-        if (checkValid(yangModuleInfo.appName, promise)) {
+        if (checkValid(yangModuleInfo.packageName, promise)) {
             yyAPI.unzipModule(yangModuleInfo, new Runnable() {
                 @Override
                 public void run() {
@@ -141,7 +141,7 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
     public void downloadModule(ReadableMap moduleInfo, final Promise promise) {
         createIfNeeded();
         YangYangModuleInfo yangModuleInfo = Utils.toYangYangModuleInfo(moduleInfo);
-        if (checkValid(yangModuleInfo.appName, promise)) {
+        if (checkValid(yangModuleInfo.packageName, promise)) {
             yyAPI.downloadModule(yangModuleInfo, new Runnable() {
                 @Override
                 public void run() {
