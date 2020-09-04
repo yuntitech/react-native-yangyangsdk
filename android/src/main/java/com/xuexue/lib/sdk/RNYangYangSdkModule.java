@@ -71,16 +71,18 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
     @ReactMethod
     public void isModulePartialDownloaded(ReadableMap moduleInfo, Promise promise) {
         createIfNeeded();
-        if (checkValid(promise)) {
-            promise.resolve(yyAPI.isModulePartialDownloaded(Utils.toYangYangModuleInfo(moduleInfo)));
+        YangYangModuleInfo yangModuleInfo = Utils.toYangYangModuleInfo(moduleInfo);
+        if (checkValid(yangModuleInfo.appName, promise)) {
+            promise.resolve(yyAPI.isModulePartialDownloaded(yangModuleInfo));
         }
     }
 
     @ReactMethod
-    public void showDownloadDialog(String appName, String size, final Promise promise) {
+    public void showDownloadDialog(ReadableMap moduleInfo, final Promise promise) {
         createIfNeeded();
-        if (checkValid(promise)) {
-            yyAPI.showDownloadDialog(appName, size, new Runnable() {
+        YangYangModuleInfo yangModuleInfo = Utils.toYangYangModuleInfo(moduleInfo);
+        if (checkValid(yangModuleInfo.appName, promise)) {
+            yyAPI.showDownloadDialog(yangModuleInfo, new Runnable() {
                 @Override
                 public void run() {
                     promise.resolve(Arguments.createMap());
@@ -106,24 +108,27 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
     @ReactMethod
     public void isModuleInstalled(ReadableMap moduleInfo, Promise promise) {
         createIfNeeded();
-        if (checkValid(promise)) {
-            promise.resolve(yyAPI.isModuleInstalled(Utils.toYangYangModuleInfo(moduleInfo)));
+        YangYangModuleInfo yangModuleInfo = Utils.toYangYangModuleInfo(moduleInfo);
+        if (checkValid(yangModuleInfo.appName, promise)) {
+            promise.resolve(yyAPI.isModuleInstalled(yangModuleInfo));
         }
     }
 
     @ReactMethod
     public void isModuleDownloaded(ReadableMap moduleInfo, Promise promise) {
         createIfNeeded();
-        if (checkValid(promise)) {
-            promise.resolve(yyAPI.isModuleDownloaded(Utils.toYangYangModuleInfo(moduleInfo)));
+        YangYangModuleInfo yangModuleInfo = Utils.toYangYangModuleInfo(moduleInfo);
+        if (checkValid(yangModuleInfo.appName, promise)) {
+            promise.resolve(yyAPI.isModuleDownloaded(yangModuleInfo));
         }
     }
 
     @ReactMethod
-    public void unzipModule(String moduleName, final Promise promise) {
+    public void unzipModule(ReadableMap moduleInfo, final Promise promise) {
         createIfNeeded();
-        if (checkValid(moduleName, promise)) {
-            yyAPI.unzipModule(moduleName, new Runnable() {
+        YangYangModuleInfo yangModuleInfo = Utils.toYangYangModuleInfo(moduleInfo);
+        if (checkValid(yangModuleInfo.appName, promise)) {
+            yyAPI.unzipModule(yangModuleInfo, new Runnable() {
                 @Override
                 public void run() {
                     promise.resolve(Arguments.createMap());
@@ -133,10 +138,11 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
     }
 
     @ReactMethod
-    public void downloadModule(String moduleName, final Promise promise) {
+    public void downloadModule(ReadableMap moduleInfo, final Promise promise) {
         createIfNeeded();
-        if (checkValid(moduleName, promise)) {
-            yyAPI.downloadModule(moduleName, new Runnable() {
+        YangYangModuleInfo yangModuleInfo = Utils.toYangYangModuleInfo(moduleInfo);
+        if (checkValid(yangModuleInfo.appName, promise)) {
+            yyAPI.downloadModule(yangModuleInfo, new Runnable() {
                 @Override
                 public void run() {
                     promise.resolve(Arguments.createMap());

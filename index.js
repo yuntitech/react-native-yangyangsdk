@@ -58,8 +58,8 @@ const isModulePartialDownloaded = (
   return RNYangYangSdk.isModulePartialDownloaded(moduleInfo);
 };
 
-const showDownloadDialog = (appName: string, size: string): Promise<void> => {
-  return RNYangYangSdk.showDownloadDialog(appName, size);
+const showDownloadDialog = (moduleInfo: YangYangModuleInfo): Promise<void> => {
+  return RNYangYangSdk.showDownloadDialog(moduleInfo);
 };
 
 /**
@@ -86,16 +86,16 @@ const isModuleDownloaded = (
  * 解压模块
  * @param moduleName
  */
-const unzipModule = (moduleName: string): Promise<void> => {
-  return RNYangYangSdk.unzipModule(moduleName);
+const unzipModule = (moduleInfo: YangYangModuleInfo): Promise<void> => {
+  return RNYangYangSdk.unzipModule(moduleInfo);
 };
 
 /**
  *  下载模块
  * @param moduleName
  */
-const downloadModule = (moduleName: string): Promise<void> => {
-  return RNYangYangSdk.downloadModule(moduleName);
+const downloadModule = (moduleInfo: YangYangModuleInfo): Promise<void> => {
+  return RNYangYangSdk.downloadModule(moduleInfo);
 };
 
 /**
