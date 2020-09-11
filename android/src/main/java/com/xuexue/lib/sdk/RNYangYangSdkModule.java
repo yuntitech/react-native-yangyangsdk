@@ -92,6 +92,20 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
     }
 
     @ReactMethod
+    public void showOpenDialog(ReadableMap moduleInfo, final Promise promise) {
+        createIfNeeded();
+        YangYangModuleInfo yangModuleInfo = Utils.toYangYangModuleInfo(moduleInfo);
+        if (checkValid(yangModuleInfo.packageName, promise)) {
+            yyAPI.showOpenDialog(yangModuleInfo, new Runnable() {
+                @Override
+                public void run() {
+                    promise.resolve(Arguments.createMap());
+                }
+            });
+        }
+    }
+
+    @ReactMethod
     public void setDebug(boolean debug) {
         Activity activity = getCurrentActivity();
         if (activity != null && mDebug != debug) {
@@ -102,6 +116,15 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
             yyAPI = YangYangAPIFactory.createYangYangAPI(activity, debug);
             yyAPI.setLoginHandler(this);
             yyAPI.setPayHandler(this);
+        }
+    }
+
+    @ReactMethod
+    public void isModuleInstalling(ReadableMap moduleInfo, Promise promise) {
+        createIfNeeded();
+        YangYangModuleInfo yangModuleInfo = Utils.toYangYangModuleInfo(moduleInfo);
+        if (checkValid(yangModuleInfo.packageName, promise)) {
+            promise.resolve(yyAPI.isModuleInstalling(yangModuleInfo));
         }
     }
 

@@ -63,6 +63,19 @@ const showDownloadDialog = (moduleInfo: YangYangModuleInfo): Promise<void> => {
   return RNYangYangSdk.showDownloadDialog(moduleInfo);
 };
 
+const showOpenDialog = (moduleInfo: YangYangModuleInfo): Promise<void> => {
+  return RNYangYangSdk.showOpenDialog(moduleInfo);
+};
+
+/**
+ * 模块是否正在安装
+ */
+const isModuleInstalling = (
+  moduleInfo: YangYangModuleInfo
+): Promise<boolean> => {
+  return RNYangYangSdk.isModuleInstalling(moduleInfo);
+};
+
 /**
  * 模块是否安装
  */
@@ -156,6 +169,8 @@ export default {
   getModuleInfo,
   isModulePartialDownloaded,
   showDownloadDialog,
+  showOpenDialog,
+  isModuleInstalling,
   isModuleInstalled,
   isModuleDownloaded,
   unzipModule,
