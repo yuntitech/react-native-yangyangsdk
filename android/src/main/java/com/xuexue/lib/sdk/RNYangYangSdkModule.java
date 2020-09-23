@@ -4,6 +4,7 @@ package com.xuexue.lib.sdk;
 import android.app.Activity;
 import android.content.Intent;
 import android.text.TextUtils;
+import android.widget.Toast;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
