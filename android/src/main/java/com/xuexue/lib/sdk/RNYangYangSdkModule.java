@@ -197,6 +197,52 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
     }
 
     @ReactMethod
+    public void startModule(final String modulePackageName, final ReadableMap userInfoMap, final Promise promise) {
+        createIfNeeded();
+        if (!checkValid(modulePackageName, promise)) {
+            return;
+        }
+        yyAPI.getModuleInfo(modulePackageName, new YangYangModuleCallback() {
+            public void onModuleCallback(final YangYangModuleInfo moduleInfo) {
+                if (moduleInfo.statusCode == 0) {
+                    if (yyAPI.isModuleInstalling(moduleInfo)) {
+                        promise.reject(new Exception("module is installing"));
+                        return;
+                    }
+                    final YangYangUserInfo userInfo = userInfoMap != null ? Utils.toYangYangUserInfo(userInfoMap) : null;
+                    if (yyAPI.isModuleInstalled(moduleInfo)) {
+                        startDynamicGdxActivity(modulePackageName, userInfo, promise);
+                    } else if (yyAPI.isModuleDownloaded(moduleInfo)) {
+                        yyAPI.unzipModule(moduleInfo, new Runnable() {
+                            public void run() {
+                                yyAPI.showOpenDialog(moduleInfo, new Runnable() {
+                                    public void run() {
+                                        startModule(modulePackageName, userInfoMap, promise);
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        yyAPI.showDownloadDialog(moduleInfo, new Runnable() {
+                            public void run() {
+                                yyAPI.downloadModule(moduleInfo, new Runnable() {
+                                    public void run() {
+                                        startModule(modulePackageName, userInfoMap, promise);
+                                    }
+                                });
+                            }
+                        });
+                    }
+                } else {
+                    Toast.makeText(getReactApplicationContext(), moduleInfo.errorMessage, Toast.LENGTH_LONG).show();
+                    promise.reject(new Exception(moduleInfo.errorMessage));
+                }
+
+            }
+        });
+    }
+
+    @ReactMethod
     public void onLoginCallback(ReadableMap params) {
         if (mIYangYangLoginCallback != null) {
             mIYangYangLoginCallback.onLoginCallback(Utils.toYangYangLoginResult(params));
@@ -287,5 +333,20 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
         eventEmitter.emit(EVENT_YANGYANG_PAY_REQUEST, data);
     }
 
+    private void startDynamicGdxActivity(String modulePackageName, YangYangUserInfo userInfo, Promise promise) {
+        Activity activity = getCurrentActivity();
+        if (activity != null) {
+            Intent intent = new Intent(activity, DynamicGdxActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            intent.putExtra("app_id", modulePackageName);
+            if (userInfo != null) {
+                intent.putExtra("user_id", userInfo.userId);
+            }
+            activity.startActivity(intent);
+            promise.resolve(Arguments.createMap());
+        } else {
+            promise.reject(new Exception("activity is null"));
+        }
+    }
 
 }

@@ -165,6 +165,17 @@ const removeListener = (
   EventEmitter.removeListener(eventName, callback);
 };
 
+/**
+ * 进入模块
+ * @param moduleName
+ */
+const startModule = (
+    moduleName: string,
+    userInfo: ?YangYangUserInfo
+): Promise<void> => {
+  return RNYangYangSdk.startModule(moduleName, userInfo);
+};
+
 export default {
   getModuleInfo,
   isModulePartialDownloaded,
@@ -183,4 +194,5 @@ export default {
   getPurchasedModules,
   addListener,
   removeListener,
+  startModule
 };
