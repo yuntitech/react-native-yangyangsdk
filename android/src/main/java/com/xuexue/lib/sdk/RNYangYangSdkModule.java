@@ -37,11 +37,11 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
     private static final String EVENT_YANGYANG_LOGIN_REQUEST = "YANGYANG_LOGIN_REQUEST";
     private static final String EVENT_YANGYANG_PAY_REQUEST = "YANGYANG_PLAY_REQUEST";
     private boolean mDebug = false;
+    private boolean canShowOpenDialog = true;
 
     public RNYangYangSdkModule(ReactApplicationContext reactContext) {
         super(reactContext);
         this.reactContext = reactContext;
-
     }
 
     @Override
@@ -97,9 +97,14 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
         createIfNeeded();
         YangYangModuleInfo yangModuleInfo = Utils.toYangYangModuleInfo(moduleInfo);
         if (checkValid(yangModuleInfo.packageName, promise)) {
-            yyAPI.showOpenDialog(yangModuleInfo, new Runnable() {
+            this.showOpenDialog(yangModuleInfo, new OpenAppDialog.OpenAppDialogDelegate() {
                 @Override
-                public void run() {
+                public void doCancel() {
+                    promise.reject(new Exception("取消"));
+                }
+
+                @Override
+                public void doConfirm() {
                     promise.resolve(Arguments.createMap());
                 }
             });
@@ -216,8 +221,17 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
                     } else if (yyAPI.isModuleDownloaded(moduleInfo)) {
                         yyAPI.unzipModule(moduleInfo, new Runnable() {
                             public void run() {
-                                yyAPI.showOpenDialog(moduleInfo, new Runnable() {
-                                    public void run() {
+                                if (yyAPI != null && yyAPI instanceof DefaultYangYangAPI) {
+                                    ((DefaultYangYangAPI) yyAPI).finishInstallModule(moduleInfo);
+                                }
+                                showOpenDialog(moduleInfo, new OpenAppDialog.OpenAppDialogDelegate() {
+                                    @Override
+                                    public void doCancel() {
+                                        canShowOpenDialog = true;
+                                    }
+
+                                    @Override
+                                    public void doConfirm() {
                                         startModule(modulePackageName, userInfoMap, promise);
                                     }
                                 });
@@ -290,6 +304,10 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
         });
     }
 
+    @ReactMethod
+    public void setCanShowOpenDialog(boolean canShowOpenDialog) {
+        this.canShowOpenDialog = canShowOpenDialog;
+    }
 
     private boolean checkValid(String moduleName, Promise promise) {
         if (TextUtils.isEmpty(moduleName)) {
@@ -344,9 +362,55 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
                 intent.putExtra("user_id", userInfo.userId);
             }
             activity.startActivity(intent);
+            this.canShowOpenDialog = false;
             promise.resolve(Arguments.createMap());
         } else {
             promise.reject(new Exception("activity is null"));
+        }
+    }
+
+    private void showOpenDialog(final YangYangModuleInfo moduleInfo,
+                                final com.xuexue.lib.sdk.OpenAppDialog.OpenAppDialogDelegate delegate) {
+        if (!this.canShowOpenDialog) {
+            showMessageInMainThread("“" + moduleInfo.appName + "”已下载完成");
+            return;
+        }
+        final Activity activity = getCurrentActivity();
+        if (activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (!activity.isFinishing()) {
+                        try {
+                            OpenAppDialog dialog = new OpenAppDialog();
+                            dialog.show(activity.getFragmentManager(), moduleInfo.appName, delegate);
+                            canShowOpenDialog = false;
+                        } catch (Throwable var2) {
+                            showMessage("“" + moduleInfo.appName + "”已下载完成");
+                        }
+                    }
+                }
+            });
+        } else {
+            this.canShowOpenDialog = true;
+        }
+    }
+
+    private void showMessage(String message) {
+        if (yyAPI != null && yyAPI instanceof DefaultYangYangAPI) {
+            ((DefaultYangYangAPI) yyAPI).showMessage(message);
+        }
+    }
+
+    private void showMessageInMainThread(final String message) {
+        final Activity activity = getCurrentActivity();
+        if (activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    showMessage(message);
+                }
+            });
         }
     }
 

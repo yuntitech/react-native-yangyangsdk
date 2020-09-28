@@ -176,6 +176,10 @@ const startModule = (
   return RNYangYangSdk.startModule(moduleName, userInfo);
 };
 
+const setCanShowOpenDialog = (canShowOpenDialog: boolean) => {
+  return RNYangYangSdk.setCanShowOpenDialog(canShowOpenDialog);
+};
+
 export default {
   getModuleInfo,
   isModulePartialDownloaded,
@@ -194,5 +198,6 @@ export default {
   getPurchasedModules,
   addListener,
   removeListener,
-  startModule
+  startModule,
+  setCanShowOpenDialog,
 };
