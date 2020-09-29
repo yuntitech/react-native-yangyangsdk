@@ -211,6 +211,11 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
         yyAPI.getModuleInfo(modulePackageName, new YangYangModuleCallback() {
             public void onModuleCallback(final YangYangModuleInfo moduleInfo) {
                 if (moduleInfo.statusCode == 0) {
+
+                    if (yyAPI instanceof DefaultYangYangAPI) {
+                        ((DefaultYangYangAPI) yyAPI).showModuleInstallProgress(moduleInfo);
+                    }
+
                     if (yyAPI.isModuleInstalling(moduleInfo)) {
                         promise.reject(new Exception("module is installing"));
                         return;
