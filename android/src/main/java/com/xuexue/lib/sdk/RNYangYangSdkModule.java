@@ -284,7 +284,7 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
             return;
         }
         try {
-            Class<?> clazz = Class.forName("com.reactnativenavigation.controllers.NavigationActivity");
+            Class<?> clazz = Class.forName("cn.bookln.saas.MainActivity");
             Intent intent = new Intent(activity, clazz);
             intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             activity.startActivity(intent);
