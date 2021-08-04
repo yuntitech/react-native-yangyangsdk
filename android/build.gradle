@@ -56,4 +56,5 @@ dependencies {
     implementation "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
     implementation "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
     implementation 'com.alibaba:fastjson:1.1.67.android'
+    implementation 'com.xuexue:gdx:1.0'
 }
