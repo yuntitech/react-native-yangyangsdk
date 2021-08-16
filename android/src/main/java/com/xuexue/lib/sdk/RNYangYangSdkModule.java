@@ -82,7 +82,7 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
     public void showDownloadDialog(ReadableMap moduleInfo, final Promise promise) {
         createIfNeeded();
         YangYangModuleInfo yangModuleInfo = Utils.toYangYangModuleInfo(moduleInfo);
-        if (checkValid(yangModuleInfo.packageName, promise)) {
+        if (checkValid(yangModuleInfo.packageName, promise) && checkActivity()) {
             yyAPI.showDownloadDialog(yangModuleInfo, new Runnable() {
                 @Override
                 public void run() {
@@ -96,7 +96,7 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
     public void showOpenDialog(ReadableMap moduleInfo, final Promise promise) {
         createIfNeeded();
         YangYangModuleInfo yangModuleInfo = Utils.toYangYangModuleInfo(moduleInfo);
-        if (checkValid(yangModuleInfo.packageName, promise)) {
+        if (checkValid(yangModuleInfo.packageName, promise) && checkActivity()) {
             this.showOpenDialog(yangModuleInfo, new OpenAppDialog.OpenAppDialogDelegate() {
                 @Override
                 public void doCancel() {
@@ -229,29 +229,33 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
                                 if (yyAPI != null && yyAPI instanceof DefaultYangYangAPI) {
                                     ((DefaultYangYangAPI) yyAPI).finishInstallModule(moduleInfo);
                                 }
-                                showOpenDialog(moduleInfo, new OpenAppDialog.OpenAppDialogDelegate() {
-                                    @Override
-                                    public void doCancel() {
-                                        canShowOpenDialog = true;
-                                    }
+                                if (checkActivity()) {
+                                    showOpenDialog(moduleInfo, new OpenAppDialog.OpenAppDialogDelegate() {
+                                        @Override
+                                        public void doCancel() {
+                                            canShowOpenDialog = true;
+                                        }
 
-                                    @Override
-                                    public void doConfirm() {
-                                        startModule(modulePackageName, userInfoMap, promise);
-                                    }
-                                });
+                                        @Override
+                                        public void doConfirm() {
+                                            startModule(modulePackageName, userInfoMap, promise);
+                                        }
+                                    });
+                                }
                             }
                         });
                     } else {
-                        yyAPI.showDownloadDialog(moduleInfo, new Runnable() {
-                            public void run() {
-                                yyAPI.downloadModule(moduleInfo, new Runnable() {
-                                    public void run() {
-                                        startModule(modulePackageName, userInfoMap, promise);
-                                    }
-                                });
-                            }
-                        });
+                        if (checkActivity()) {
+                            yyAPI.showDownloadDialog(moduleInfo, new Runnable() {
+                                public void run() {
+                                    yyAPI.downloadModule(moduleInfo, new Runnable() {
+                                        public void run() {
+                                            startModule(modulePackageName, userInfoMap, promise);
+                                        }
+                                    });
+                                }
+                            });
+                        }
                     }
                 } else {
                     Toast.makeText(getReactApplicationContext(), moduleInfo.errorMessage, Toast.LENGTH_LONG).show();
@@ -385,7 +389,7 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    if (!activity.isFinishing()) {
+                    if (checkActivity()) {
                         try {
                             OpenAppDialog dialog = new OpenAppDialog();
                             dialog.show(activity.getFragmentManager(), moduleInfo.appName, delegate);
@@ -417,6 +421,11 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
                 }
             });
         }
+    }
+
+    private boolean checkActivity() {
+        Activity activity = getCurrentActivity();
+        return activity != null && !activity.isFinishing();
     }
 
 }
