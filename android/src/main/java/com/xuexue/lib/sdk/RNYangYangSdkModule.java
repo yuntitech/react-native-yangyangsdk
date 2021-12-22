@@ -4,7 +4,6 @@ package com.xuexue.lib.sdk;
 import android.app.Activity;
 import android.content.Intent;
 import android.text.TextUtils;
-import android.widget.Toast;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
@@ -69,14 +68,6 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
         }
     }
 
-    @ReactMethod
-    public void isModulePartialDownloaded(ReadableMap moduleInfo, Promise promise) {
-        createIfNeeded();
-        YangYangModuleInfo yangModuleInfo = Utils.toYangYangModuleInfo(moduleInfo);
-        if (checkValid(yangModuleInfo.packageName, promise)) {
-            promise.resolve(yyAPI.isModulePartialDownloaded(yangModuleInfo));
-        }
-    }
 
     @ReactMethod
     public void showDownloadDialog(ReadableMap moduleInfo, final Promise promise) {
@@ -119,88 +110,12 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
             if (yyAPI != null) {
                 yyAPI = null;
             }
-            yyAPI = YangYangAPIFactory.createYangYangAPI(activity, debug);
+            yyAPI = YangYangAPIFactory.createYangYangAPI(activity, "shulian", debug);
             yyAPI.setLoginHandler(this);
             yyAPI.setPayHandler(this);
         }
     }
 
-    @ReactMethod
-    public void isModuleInstalling(ReadableMap moduleInfo, Promise promise) {
-        createIfNeeded();
-        YangYangModuleInfo yangModuleInfo = Utils.toYangYangModuleInfo(moduleInfo);
-        if (checkValid(yangModuleInfo.packageName, promise)) {
-            promise.resolve(yyAPI.isModuleInstalling(yangModuleInfo));
-        }
-    }
-
-    @ReactMethod
-    public void isModuleInstalled(ReadableMap moduleInfo, Promise promise) {
-        createIfNeeded();
-        YangYangModuleInfo yangModuleInfo = Utils.toYangYangModuleInfo(moduleInfo);
-        if (checkValid(yangModuleInfo.packageName, promise)) {
-            promise.resolve(yyAPI.isModuleInstalled(yangModuleInfo));
-        }
-    }
-
-    @ReactMethod
-    public void isModuleDownloaded(ReadableMap moduleInfo, Promise promise) {
-        createIfNeeded();
-        YangYangModuleInfo yangModuleInfo = Utils.toYangYangModuleInfo(moduleInfo);
-        if (checkValid(yangModuleInfo.packageName, promise)) {
-            promise.resolve(yyAPI.isModuleDownloaded(yangModuleInfo));
-        }
-    }
-
-    @ReactMethod
-    public void unzipModule(ReadableMap moduleInfo, final Promise promise) {
-        createIfNeeded();
-        YangYangModuleInfo yangModuleInfo = Utils.toYangYangModuleInfo(moduleInfo);
-        if (checkValid(yangModuleInfo.packageName, promise)) {
-            yyAPI.unzipModule(yangModuleInfo, new Runnable() {
-                @Override
-                public void run() {
-                    promise.resolve(Arguments.createMap());
-                }
-            });
-        }
-    }
-
-    @ReactMethod
-    public void downloadModule(ReadableMap moduleInfo, final Promise promise) {
-        createIfNeeded();
-        YangYangModuleInfo yangModuleInfo = Utils.toYangYangModuleInfo(moduleInfo);
-        if (checkValid(yangModuleInfo.packageName, promise)) {
-            yyAPI.downloadModule(yangModuleInfo, new Runnable() {
-                @Override
-                public void run() {
-                    promise.resolve(Arguments.createMap());
-                }
-            });
-        }
-    }
-
-    @ReactMethod
-    public void launchModule(String moduleName, ReadableMap userInfo, Promise promise) {
-        createIfNeeded();
-        if (checkValid(moduleName, promise)) {
-            Activity activity = getCurrentActivity();
-            if (activity != null) {
-                Intent intent = new Intent(activity, DynamicGdxActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                intent.putExtra("app_id", moduleName);
-                YangYangUserInfo yangUserInfo = userInfo != null ? Utils.toYangYangUserInfo(userInfo) : null;
-                if (yangUserInfo != null) {
-                    intent.putExtra("user_id", yangUserInfo.userId);
-                }
-                activity.startActivity(intent);
-                promise.resolve(Arguments.createMap());
-            } else {
-                promise.reject(new Exception("activity is null"));
-            }
-
-        }
-    }
 
     @ReactMethod
     public void startModule(final String modulePackageName, final ReadableMap userInfoMap, final Promise promise) {
@@ -208,62 +123,14 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
         if (!checkValid(modulePackageName, promise)) {
             return;
         }
-        yyAPI.getModuleInfo(modulePackageName, new YangYangModuleCallback() {
-            public void onModuleCallback(final YangYangModuleInfo moduleInfo) {
-                if (moduleInfo.statusCode == 0) {
-
-                    if (yyAPI instanceof DefaultYangYangAPI) {
-                        ((DefaultYangYangAPI) yyAPI).showModuleInstallProgress(moduleInfo);
-                    }
-
-                    if (yyAPI.isModuleInstalling(moduleInfo)) {
-                        promise.reject(new Exception("module is installing"));
-                        return;
-                    }
-                    final YangYangUserInfo userInfo = userInfoMap != null ? Utils.toYangYangUserInfo(userInfoMap) : null;
-                    if (yyAPI.isModuleInstalled(moduleInfo)) {
-                        startDynamicGdxActivity(modulePackageName, userInfo, promise);
-                    } else if (yyAPI.isModuleDownloaded(moduleInfo)) {
-                        yyAPI.unzipModule(moduleInfo, new Runnable() {
-                            public void run() {
-                                if (yyAPI != null && yyAPI instanceof DefaultYangYangAPI) {
-                                    ((DefaultYangYangAPI) yyAPI).finishInstallModule(moduleInfo);
-                                }
-                                if (checkActivity()) {
-                                    showOpenDialog(moduleInfo, new OpenAppDialog.OpenAppDialogDelegate() {
-                                        @Override
-                                        public void doCancel() {
-                                            canShowOpenDialog = true;
-                                        }
-
-                                        @Override
-                                        public void doConfirm() {
-                                            startModule(modulePackageName, userInfoMap, promise);
-                                        }
-                                    });
-                                }
-                            }
-                        });
-                    } else {
-                        if (checkActivity()) {
-                            yyAPI.showDownloadDialog(moduleInfo, new Runnable() {
-                                public void run() {
-                                    yyAPI.downloadModule(moduleInfo, new Runnable() {
-                                        public void run() {
-                                            startModule(modulePackageName, userInfoMap, promise);
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    }
-                } else {
-                    Toast.makeText(getReactApplicationContext(), moduleInfo.errorMessage, Toast.LENGTH_LONG).show();
-                    promise.reject(new Exception(moduleInfo.errorMessage));
-                }
-
-            }
-        });
+        final YangYangUserInfo userInfo = userInfoMap != null ? Utils.toYangYangUserInfo(userInfoMap) : null;
+        if (userInfo == null) {
+            promise.reject("","userInfo为null");
+            return;
+        }
+        if (yyAPI instanceof DefaultYangYangAPI) {
+            yyAPI.startModule(modulePackageName, userInfo);
+        }
     }
 
     @ReactMethod
@@ -341,7 +208,7 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
     private void createIfNeeded() {
         Activity activity = getCurrentActivity();
         if (yyAPI == null && activity != null) {
-            yyAPI = YangYangAPIFactory.createYangYangAPI(activity, mDebug);
+            yyAPI = YangYangAPIFactory.createYangYangAPI(activity, "shulian", mDebug);
             yyAPI.setLoginHandler(this);
             yyAPI.setPayHandler(this);
         }
@@ -407,7 +274,7 @@ public class RNYangYangSdkModule extends ReactContextBaseJavaModule implements I
 
     private void showMessage(String message) {
         if (yyAPI != null && yyAPI instanceof DefaultYangYangAPI) {
-            ((DefaultYangYangAPI) yyAPI).showMessage(message);
+            ((DefaultYangYangAPI) yyAPI).showToastMessage(message);
         }
     }
 
